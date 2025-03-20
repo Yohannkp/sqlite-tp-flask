@@ -195,32 +195,39 @@ with app.app_context():
 migrate = Migrate(app, db)
 @app.route('/')
 def index():
-    if session:
-        tasks = Task.query.all()
-        tickets = db.session.query(Ticket.id, Ticket.title, Ticket.description, Ticket.status, User.username, User.id.label("user_id")) \
-                            .join(User, Ticket.user_id == User.id).all()
-        
-        total_users = User.query.count()
-        total_tickets = Ticket.query.count()
-        open_tickets = Ticket.query.filter_by(status="open").count()
-        closed_tickets = Ticket.query.filter_by(status="closed").count()
-        in_progress_tickets = Ticket.query.filter_by(status="in progress").count()
-        pending_tickets = Ticket.query.filter_by(status="pending").count()
-        if session['role'] == "user":
-            tasks = Task.query.filter_by(user_id=session["user_id"]).all()
-            ticket = Ticket.query.filter_by(user_id=session["user_id"]).all()
-            print(ticket)
-            return render_template('index.html',tasks = tasks,tickets = ticket)
-        return render_template('index.html',total_users=total_users, 
-                            total_tickets=total_tickets, 
-                            open_tickets=open_tickets,
-                            tasks=tasks, 
-                            tickets=tickets,
-                            closed_tickets = closed_tickets,
-                            in_progress_tickets = in_progress_tickets,
-                            pending_tickets = pending_tickets)
-    else:
+    
+    try:
+        if session['role']:
+            tasks = Task.query.all()
+            tickets = db.session.query(Ticket.id, Ticket.title, Ticket.description, Ticket.status, User.username, User.id.label("user_id")) \
+                                .join(User, Ticket.user_id == User.id).all()
+            
+            total_users = User.query.count()
+            total_tickets = Ticket.query.count()
+            open_tickets = Ticket.query.filter_by(status="open").count()
+            closed_tickets = Ticket.query.filter_by(status="closed").count()
+            in_progress_tickets = Ticket.query.filter_by(status="in progress").count()
+            pending_tickets = Ticket.query.filter_by(status="pending").count()
+            if session['role'] == "user":
+                tasks = Task.query.filter_by(user_id=session["user_id"]).all()
+                ticket = Ticket.query.filter_by(user_id=session["user_id"]).all()
+                print(ticket)
+                return render_template('index.html',tasks = tasks,tickets = ticket)
+            return render_template('index.html',total_users=total_users, 
+                                total_tickets=total_tickets, 
+                                open_tickets=open_tickets,
+                                tasks=tasks, 
+                                tickets=tickets,
+                                closed_tickets = closed_tickets,
+                                in_progress_tickets = in_progress_tickets,
+                                pending_tickets = pending_tickets)
+    
+    except:
         return redirect(url_for('login'))
+        
+    
+    return redirect(url_for('login'))
+        
 
 # Page d'inscription
 @app.route('/register', methods=['GET', 'POST'])
