@@ -15,9 +15,9 @@ from flask_login import LoginManager, login_required, current_user,login_user
 import os
 
 app = Flask(__name__)
-
+db_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'db', 'instance/database.db')
 app.config['SECRET_KEY'] = 'ma_cle_secrete'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///{db_path}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Initialisation de Flask-SocketIO
 socketio = SocketIO(app)
@@ -426,3 +426,5 @@ if __name__ == '__main__':
         db.create_all()  # Crée la base de données si elle n'existe pas
     port = int(os.getenv("PORT", 8000))  # Railway définit dynamiquement le port
     uvicorn.run(app, host="0.0.0.0", port=port)
+    #uvicorn.run(app, host="127.0.0.1", port=port)
+    #app.run(debug=True, host='127.0.0.1', port=5000)
