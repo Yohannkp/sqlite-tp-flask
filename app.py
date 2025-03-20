@@ -15,9 +15,9 @@ from flask_login import LoginManager, login_required, current_user,login_user
 import os
 
 app = Flask(__name__)
-db_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'db', 'instance/database.db')
+#db_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'db', 'instance/database.db')
 app.config['SECRET_KEY'] = 'ma_cle_secrete'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///{db_path}'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Initialisation de Flask-SocketIO
 socketio = SocketIO(app)
@@ -128,7 +128,7 @@ def admin_tickets():
 
 class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    ticket_id = db.Column(db.Integer, db.ForeignKey('ticket.id'), nullable=False)  # Clé étrangère vers le ticket
+    ticket_id = db.Column(db.Integer, db.ForeignKey('ticket.id', ondelete='CASCADE'), nullable=True)  # Clé étrangère vers le ticket
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # Clé étrangère vers l'utilisateur
     admin_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)  # Clé étrangère vers l'administrateur (peut être NULL si l'utilisateur est l'auteur du message)
     content = db.Column(db.Text, nullable=False)  # Contenu du message
@@ -159,7 +159,7 @@ class Ticket(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # Clé étrangère
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=False)
-    status = db.Column(db.String(50), nullable=False, default="ouvert")  # Exemple : ouvert, en cours, fermé
+    status = db.Column(db.String(50), nullable=False, default="open")  # Exemple : ouvert, en cours, fermé
     
 # Modèle Tâches
 class Task(db.Model):
@@ -343,7 +343,7 @@ def tickets():
         title = request.form.get('title')
         description = request.form.get('description')
         priority = request.form.get('priority', 'normale')  # Valeur par défaut
-        status = "ouvert"  # Tous les nouveaux tickets sont "ouverts" par défaut
+        status = "open"  # Tous les nouveaux tickets sont "ouverts" par défaut
 
         if title and description:
             new_ticket = Ticket(title=title, description=description, status=status, user_id=user.id)
