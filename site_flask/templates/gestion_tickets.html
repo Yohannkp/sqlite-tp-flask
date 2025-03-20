@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+
+    <title>Système de gestion de tickets</title>
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+  </head>
+
+  <body>
+    <header>
+      <h1>Gestion de Tickets</h1>
+    </header>
+
+    <div class="container">
+      <nav class="sidebar">
+        <ul>
+          <li><a href="#">Tableau de bord</a></li>
+          <li><a href="#">Tickets en cours</a></li>
+          <li><a href="#">Mes tickets</a></li>
+          <li><a href="#">Paramètres</a></li>
+        </ul>
+      </nav>
+
+      <main class="main-content">
+        <!-- Formulaire de création de ticket -->
+        <div class="ticket-form">
+          <h2>Créer un nouveau ticket</h2>
+          <form method="POST" action="{{ url_for('creer_ticket') }}">
+            <label for="titre">Titre du ticket</label>
+            <input type="text" id="titre" name="titre" required />
+
+            <label for="description">Description</label>
+            <textarea
+              id="description"
+              name="description"
+              rows="3"
+              required
+            ></textarea>
+
+            <label for="priorite">Priorité</label>
+            <select id="priorite" name="priorite">
+              <option value="basse">Basse</option>
+              <option value="normale">Normale</option>
+              <option value="haute">Haute</option>
+              <option value="critique">Critique</option>
+            </select>
+
+            <button type="submit" class="btn btn-create">Créer</button>
+          </form>
+        </div>
+
+        <!-- Liste des tickets existants (exemple statique) -->
+        <h2>Liste des Tickets</h2>
+        <table class="ticket-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Titre</th>
+              <th>Description</th>
+              <th>Priorité</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Exemple de lignes de tickets (à dynamiser via Flask / BD) -->
+            <tr>
+              <td>1</td>
+              <td>Problème de connexion</td>
+              <td>Impossible de se connecter au réseau interne</td>
+              <td>Haute</td>
+              <td>
+                <form
+                  method="POST"
+                  action="{{ url_for('supprimer_ticket', ticket_id=1) }}"
+                >
+                  <button type="submit" class="btn btn-delete">
+                    Supprimer
+                  </button>
+                </form>
+              </td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Erreur de compte</td>
+              <td>Les informations du compte sont incorrectes</td>
+              <td>Normale</td>
+              <td>
+                <form
+                  method="POST"
+                  action="{{ url_for('supprimer_ticket', ticket_id=2) }}"
+                >
+                  <button type="submit" class="btn btn-delete">
+                    Supprimer
+                  </button>
+                </form>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </main>
+    </div>
+  </body>
+</html>

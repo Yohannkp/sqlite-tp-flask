@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ ticket.title }}</title>
+    <style>
+        /* Global Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4f7;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-top: 20px;
+        }
+
+        /* Ticket Information */
+        .ticket-info {
+            text-align: center;
+            margin-top: 20px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: 20px auto;
+        }
+
+        .ticket-info p {
+            font-size: 16px;
+            color: #666;
+            margin: 5px 0;
+        }
+
+        /* Chat Messages */
+        #chat-messages {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 800px;
+            margin: 20px auto;
+            height: 400px;
+            overflow-y: scroll;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .message {
+            background-color: #f9f9f9;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            max-width: 70%;
+            margin-left: 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .message.admin {
+            background-color: #e0f7fa;
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .message p {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .message strong {
+            color: #00796b;
+        }
+
+        /* Message Input Section */
+        .message-input {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #message-content {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+            resize: none;
+            margin-bottom: 15px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #00796b;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #004d40;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .message {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ticket-info">
+        <h1>{{ ticket.title }}</h1>
+        <p><strong>Status:</strong> {{ ticket.status }}</p>
+        <p><strong>Description:</strong> {{ ticket.description }}</p>
+    </div>
+
+    <div id="chat-messages">
+        {% for message in messages %}
+            <div class="message {% if message.user and message.user.role == 'admin' %}admin{% endif %}" id="message-{{ message.id }}">
+                <p><strong>{{ message.user.username if message.user else 'Admin' }}</strong> ({{ message.timestamp }}):</p>
+                <p>{{ message.content }}</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="message-input">
+        <h3>Répondre</h3>
+        <form id="message-form" action="{{url_for("send_message")}}" method="POST">
+            <textarea name="content" id="message-content" rows="4" required placeholder="Écrivez votre message..."></textarea><br>
+            <input type="hidden" name="ticket_id" value="{{ ticket.id }}">
+            <button type="submit">Envoyer</button> <br>
+            <a href="{{url_for("index")}}">Acceuil</a>
+        </form>
+    </div>
+
+    
+
+    <script type="text/javascript" src="{{ url_for('static', filename='js/socketio.js') }}"></script>
+    <script type="text/javascript">
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        // Écouter les nouveaux messages
+        socket.on('new_message', function(data) {
+            var messageHtml = `
+                <div class="message ${data.user_role === 'admin' ? 'admin' : ''}">
+                    <p><strong>${data.user}</strong> (${data.timestamp}):</p>
+                    <p>${data.content}</p>
+                </div>`;
+            document.getElementById('chat-messages').innerHTML += messageHtml;
+            // Scroller vers le bas du chat après chaque nouveau message
+            document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
+        });
+
+        // Envoi d'un message via le formulaire
+        document.getElementById('message-form').onsubmit = function(e) {
+            e.preventDefault();
+            var content = document.getElementById('message-content').value;
+            var ticket_id = document.querySelector('input[name="ticket_id"]').value;
+
+            fetch('/send_message', {
+                method: 'POST',
+                body: new URLSearchParams({
+                    'content': content,
+                    'ticket_id': ticket_id
+                }),
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Réinitialiser le champ de message après l'envoi
+                document.getElementById('message-content').value = '';
+            });
+        }
+    </script>
+</body>
+</html>
