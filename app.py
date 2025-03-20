@@ -11,7 +11,7 @@ from functools import wraps
 from flask_mysqldb import MySQL
 from flask_socketio import SocketIO, emit
 from flask_login import LoginManager, login_required, current_user,login_user
-
+import os
 
 app = Flask(__name__)
 
@@ -423,4 +423,6 @@ def forgetpassword():
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()  # Crée la base de données si elle n'existe pas
+    port = int(os.getenv("PORT", 8000))  # Railway définit dynamiquement le port
+    uvicorn.run(app, host="", port=port)
     app.run(host='10.74.3.216', port=8080,debug=True)
