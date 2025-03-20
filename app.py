@@ -9,6 +9,7 @@ from flask_bcrypt import Bcrypt
 from sqlalchemy import text
 from functools import wraps
 from flask_mysqldb import MySQL
+import uvicorn
 from flask_socketio import SocketIO, emit
 from flask_login import LoginManager, login_required, current_user,login_user
 import os
