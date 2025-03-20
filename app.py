@@ -425,4 +425,4 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()  # Crée la base de données si elle n'existe pas
     port = int(os.getenv("PORT", 8000))  # Railway définit dynamiquement le port
-    app.run(host='', port=port,debug=True)
+    uvicorn.run(app, host="0.0.0.0", port=port)
